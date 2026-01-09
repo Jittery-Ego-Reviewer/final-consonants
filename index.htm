@@ -132,12 +132,31 @@
 
             <!-- Cards Grid -->
             <div class="grid grid-cols-2 gap-6 mt-auto mb-auto">
-                <button id="card-left" onclick="handleCardClick('left')" class="card h-48 bg-white border-4 border-gray-200 rounded-3xl flex items-center justify-center shadow-lg active:shadow-inner text-6xl font-bold text-gray-800">
-                    字
-                </button>
-                <button id="card-right" onclick="handleCardClick('right')" class="card h-48 bg-white border-4 border-gray-200 rounded-3xl flex items-center justify-center shadow-lg active:shadow-inner text-6xl font-bold text-gray-800">
-                    字
-                </button>
+                <!-- Left Card Container -->
+                <div class="flex flex-col items-center">
+                    <button id="card-left" onclick="handleCardClick('left')" class="w-full card h-40 bg-white border-4 border-gray-200 rounded-3xl flex items-center justify-center shadow-lg active:shadow-inner text-6xl font-bold text-gray-800 mb-3">
+                        字
+                    </button>
+                    <button onclick="playTTS('left')" class="flex items-center gap-1 bg-white border border-gray-300 text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-full text-sm font-bold transition shadow-sm active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                        <span>聽發音</span>
+                    </button>
+                </div>
+
+                <!-- Right Card Container -->
+                <div class="flex flex-col items-center">
+                    <button id="card-right" onclick="handleCardClick('right')" class="w-full card h-40 bg-white border-4 border-gray-200 rounded-3xl flex items-center justify-center shadow-lg active:shadow-inner text-6xl font-bold text-gray-800 mb-3">
+                        字
+                    </button>
+                    <button onclick="playTTS('right')" class="flex items-center gap-1 bg-white border border-gray-300 text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-full text-sm font-bold transition shadow-sm active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                        <span>聽發音</span>
+                    </button>
+                </div>
             </div>
             
             <div class="h-10 text-center mt-4 text-gray-400 text-sm" id="timer-bonus">
@@ -162,14 +181,24 @@
                 <div class="flex justify-center gap-4 mb-8">
                     <!-- Left Item (Feedback) -->
                     <div class="flex-1 bg-gray-50 rounded-xl p-4 flex flex-col items-center border-2" id="fb-left-container">
-                        <div class="text-4xl font-bold text-gray-800 mb-2" id="fb-left-char">字</div>
+                        <div class="text-4xl font-bold text-gray-800 mb-2 cursor-pointer hover:text-blue-600" onclick="playText(this.innerText)" id="fb-left-char">字</div>
                         <div class="text-lg font-mono text-gray-500 bg-gray-200 px-2 rounded" id="fb-left-jyut">jyut</div>
+                        <button onclick="playText(document.getElementById('fb-left-char').innerText)" class="mt-2 text-gray-400 hover:text-blue-500">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                            </svg>
+                        </button>
                     </div>
                     
                     <!-- Right Item (Feedback) -->
                     <div class="flex-1 bg-gray-50 rounded-xl p-4 flex flex-col items-center border-2" id="fb-right-container">
-                        <div class="text-4xl font-bold text-gray-800 mb-2" id="fb-right-char">字</div>
+                        <div class="text-4xl font-bold text-gray-800 mb-2 cursor-pointer hover:text-blue-600" onclick="playText(this.innerText)" id="fb-right-char">字</div>
                         <div class="text-lg font-mono text-gray-500 bg-gray-200 px-2 rounded" id="fb-right-jyut">jyut</div>
+                        <button onclick="playText(document.getElementById('fb-right-char').innerText)" class="mt-2 text-gray-400 hover:text-blue-500">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
@@ -278,6 +307,44 @@
             oscillator.stop(audioCtx.currentTime + 0.5);
         }
 
+        // --- TTS FUNCTION ---
+        function playTTS(side) {
+            const btn = document.getElementById(`card-${side}`);
+            if (btn) {
+                playText(btn.innerText);
+            }
+        }
+
+        function playText(text) {
+            if (!text) return;
+            
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Try to use a Cantonese voice
+                const voices = window.speechSynthesis.getVoices();
+                // Common Cantonese voice identifiers: 'zh-HK', 'Cantonese', 'Sin-Ji'
+                const cantoneseVoice = voices.find(v => 
+                    v.lang === 'zh-HK' || 
+                    v.name.includes('Cantonese') || 
+                    v.name.includes('HK')
+                );
+
+                if (cantoneseVoice) {
+                    utterance.voice = cantoneseVoice;
+                }
+                
+                utterance.lang = 'zh-HK';
+                utterance.rate = 0.8; // Slightly slower for clarity
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("抱歉，您的瀏覽器不支持語音功能。\nSorry, your browser doesn't support Text-to-Speech.");
+            }
+        }
+
         // --- HIGHSCORE FUNCTIONS ---
         function getHighScore(mode) {
             return localStorage.getItem('cantonese_score_' + mode) || 0;
@@ -303,6 +370,10 @@
         // Init logic
         window.onload = function() {
             updateMenuHighScores();
+            // Pre-load voices
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+            }
         };
 
         function goHome() {
