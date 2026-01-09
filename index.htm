@@ -231,7 +231,7 @@
         // --- DATA SETS ---
         
         const DATA_PT = [
-            { p: "貼", p_jp: "tip3", t: "鐵", t_jp: "tit3" },
+            { p: "貼", p_jp: "tip7", t: "鐵", t_jp: "tit7" },
             { p: "合", p_jp: "hap9", t: "核", t_jp: "hat9" },
             { p: "十", p_jp: "sap9", t: "實", t_jp: "sat9" },
             { p: "鴨", p_jp: "aap8", t: "壓", t_jp: "aat8" },
@@ -252,8 +252,8 @@
         const DATA_PK = [
             { p: "插", p_jp: "caap8", k: "拆", k_jp: "caak8" },
             { p: "夾", p_jp: "gaap8", k: "格", k_jp: "gaak8" },
-            { p: "垃", p_jp: "laap6", k: "勒", k_jp: "laak6" },
-            { p: "立", p_jp: "lap6", k: "肋", k_jp: "lak6" },
+            { p: "立", p_jp: "lap9", k: "勒", k_jp: "lak9" },
+            { p: "立", p_jp: "lap9", k: "肋", k_jp: "lak9" },
             { p: "閘", p_jp: "zaap9", k: "擇", k_jp: "zaak9" },
             { p: "襲", p_jp: "zaap9", k: "宅", k_jp: "zaak9" },
             { p: "雜", p_jp: "zaap9", k: "擇", k_jp: "zaak9" },
@@ -318,11 +318,21 @@
         function playText(text) {
             if (!text) return;
             
+            // Override for characters with multiple pronunciations (polyphones)
+            // to ensure the correct sound for this specific game context.
+            const pronunciationOverrides = {
+                "參": "攙", // Force 'caam1' (participate) instead of 'sam1' (ginseng)
+                "立": "粒", // Force 'lap' (short vowel) instead of 'laap'
+                "勒": "泐"  // Force 'laak' (long vowel) instead of 'lak'
+            };
+
+            const textToSpeak = pronunciationOverrides[text] || text;
+            
             if ('speechSynthesis' in window) {
                 // Cancel any ongoing speech
                 window.speechSynthesis.cancel();
 
-                const utterance = new SpeechSynthesisUtterance(text);
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
                 
                 // Try to use a Cantonese voice
                 const voices = window.speechSynthesis.getVoices();
