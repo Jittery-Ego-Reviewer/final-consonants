@@ -102,7 +102,7 @@
             </div>
 
             <!-- Instruction -->
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4 rounded-r shadow-sm">
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r shadow-sm">
                 <p class="text-gray-500 text-sm font-bold uppercase tracking-wide mb-1">任務指令</p>
                 <p class="text-xl font-bold text-gray-800 leading-relaxed" id="instruction-text">
                     請選擇含有...
@@ -119,20 +119,7 @@
                 </button>
             </div>
             
-            <!-- Visual Hint Section -->
-            <div id="hint-container" class="hidden mt-4 flex flex-col items-center animate-[pop_0.5s_ease-out] min-h-[120px]">
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex flex-col items-center shadow-sm">
-                    <p class="text-xs font-bold text-blue-500 mb-1 uppercase tracking-wider">💡 提示 Hint</p>
-                    <div class="relative">
-                        <img id="hint-image" src="" alt="Mouth shape" class="h-24 w-auto object-contain rounded-md" onerror="this.style.display='none'; document.getElementById('hint-fallback').style.display='block';">
-                        <div id="hint-fallback" class="hidden h-24 w-24 flex items-center justify-center bg-gray-200 text-gray-400 text-xs text-center rounded-md p-2">
-                            Image not found
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="h-6 text-center mt-2 text-gray-400 text-sm" id="timer-bonus">
+            <div class="h-10 text-center mt-4 text-gray-400 text-sm" id="timer-bonus">
                 <!-- Bonus text will appear here -->
             </div>
         </div>
@@ -246,7 +233,6 @@
         let roundStartTime = 0;
         let currentPair = null;
         let targetType = ''; // 'p', 't', 'k', 'm', 'n'
-        let hintTimeout; // Timer for the hint
         
         // --- AUDIO ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -279,9 +265,6 @@
             document.getElementById('feedback-screen').classList.add('hidden');
             document.getElementById('game-over-screen').classList.add('hidden');
             
-            // Clear any active timers
-            clearTimeout(hintTimeout);
-
             // Show Menu
             document.getElementById('menu-screen').classList.remove('hidden');
             
@@ -319,9 +302,8 @@
                 return;
             }
 
-            // Hide feedback & Reset Hint
+            // Hide feedback
             document.getElementById('feedback-screen').classList.add('hidden');
-            hideHint();
             
             // Increment Trial
             trialsCount++;
@@ -339,35 +321,6 @@
             renderRound();
             
             roundStartTime = Date.now();
-            
-            // Start the 10-second hint timer
-            hintTimeout = setTimeout(showHint, 10000);
-        }
-
-        function showHint() {
-            const hintContainer = document.getElementById('hint-container');
-            if (!hintContainer.classList.contains('hidden')) return; // Already showing
-
-            const hintImg = document.getElementById('hint-image');
-            const hintFallback = document.getElementById('hint-fallback');
-            
-            // Reset image state
-            hintImg.style.display = 'block';
-            hintFallback.style.display = 'none';
-            
-            // Set image source based on targetType
-            // Filenames: p_visual.jpg, t_visual.jpg, k_visual.jpg, m_visual.jpg, n_visual.jpg
-            hintImg.src = `${targetType}_visual.jpg`;
-            
-            // Update fallback text just in case
-            hintFallback.innerText = `${targetType}_visual.jpg`;
-
-            hintContainer.classList.remove('hidden');
-        }
-
-        function hideHint() {
-            clearTimeout(hintTimeout);
-            document.getElementById('hint-container').classList.add('hidden');
         }
 
         function updateProgress() {
@@ -442,7 +395,6 @@
             if (selectedType === targetType) {
                 // CORRECT
                 playCorrectSound();
-                clearTimeout(hintTimeout); // Stop hint timer
                 
                 // Calculate Score (Base 100 + Speed Bonus)
                 const timeTaken = (Date.now() - roundStartTime) / 1000;
@@ -461,8 +413,6 @@
             } else {
                 // WRONG
                 btn.classList.add('shake');
-                showHint(); // Show visual hint immediately on wrong answer
-                
                 // Remove shake class after animation so it can be triggered again
                 setTimeout(() => {
                     btn.classList.remove('shake');
