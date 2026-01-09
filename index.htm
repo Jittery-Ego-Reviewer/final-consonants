@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>粵語韻尾大挑戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4; /* Light Green bg */
+            touch-action: manipulation;
+        }
+
+        .card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card:active {
+            transform: scale(0.95);
+        }
+
+        /* Shake animation for wrong answer */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px) rotate(-5deg); }
+            50% { transform: translateX(10px) rotate(5deg); }
+            75% { transform: translateX(-10px) rotate(-5deg); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+            background-color: #fee2e2 !important; /* Red-100 */
+            border-color: #ef4444 !important; /* Red-500 */
+        }
+
+        /* Pop animation for correct answer */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .pop {
+            animation: pop 0.3s ease-out;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- GAME CONTAINER -->
+    <div class="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-green-200 relative min-h-[600px] flex flex-col">
+        
+        <!-- HEADER (Score) -->
+        <div class="bg-green-500 p-4 text-white flex justify-between items-center shadow-md z-10">
+            <!-- Home Button -->
+            <button onclick="goHome()" class="flex items-center text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-lg transition text-sm font-bold">
+                <span class="mr-1">🏠</span> 主頁
+            </button>
+            <div class="font-bold text-xl absolute left-1/2 transform -translate-x-1/2">韻尾大挑戰</div>
+            <div class="bg-green-700 px-4 py-1 rounded-full font-mono text-lg" id="score-display">分: 0</div>
+        </div>
+
+        <!-- 1. MENU SCREEN -->
+        <div id="menu-screen" class="flex-1 flex flex-col items-center justify-center p-6 space-y-6">
+            <h1 class="text-2xl font-bold text-gray-800 text-center mb-4">請選擇練習模式</h1>
+            
+            <button onclick="startGame('pt')" class="w-full bg-blue-100 hover:bg-blue-200 border-2 border-blue-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md">
+                <div class="text-2xl font-bold text-blue-800 text-center">/-p/ vs /-t/</div>
+                <div class="text-center text-blue-600 text-sm mt-1">鴨尾 vs 八尾</div>
+            </button>
+
+            <button onclick="startGame('pk')" class="w-full bg-orange-100 hover:bg-orange-200 border-2 border-orange-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md">
+                <div class="text-2xl font-bold text-orange-800 text-center">/-p/ vs /-k/</div>
+                <div class="text-center text-orange-600 text-sm mt-1">鴨尾 vs 宅尾</div>
+            </button>
+
+            <button onclick="startGame('mn')" class="w-full bg-purple-100 hover:bg-purple-200 border-2 border-purple-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md">
+                <div class="text-2xl font-bold text-purple-800 text-center">/-m/ vs /-n/</div>
+                <div class="text-center text-purple-600 text-sm mt-1">南尾 vs 難尾</div>
+            </button>
+        </div>
+
+        <!-- 2. GAME SCREEN -->
+        <div id="game-screen" class="hidden flex-1 flex flex-col p-6">
+            <!-- Progress Bar -->
+            <div class="flex justify-between text-xs text-gray-500 mb-1 px-1">
+                <span>進度</span>
+                <span id="trial-counter">1 / 15</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                <div id="progress-bar" class="bg-green-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- Instruction -->
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4 rounded-r shadow-sm">
+                <p class="text-gray-500 text-sm font-bold uppercase tracking-wide mb-1">任務指令</p>
+                <p class="text-xl font-bold text-gray-800 leading-relaxed" id="instruction-text">
+                    請選擇含有...
+                </p>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="grid grid-cols-2 gap-6 mt-auto mb-auto">
+                <button id="card-left" onclick="handleCardClick('left')" class="card h-48 bg-white border-4 border-gray-200 rounded-3xl flex items-center justify-center shadow-lg active:shadow-inner text-6xl font-bold text-gray-800">
+                    字
+                </button>
+                <button id="card-right" onclick="handleCardClick('right')" class="card h-48 bg-white border-4 border-gray-200 rounded-3xl flex items-center justify-center shadow-lg active:shadow-inner text-6xl font-bold text-gray-800">
+                    字
+                </button>
+            </div>
+            
+            <!-- Visual Hint Section -->
+            <div id="hint-container" class="hidden mt-4 flex flex-col items-center animate-[pop_0.5s_ease-out] min-h-[120px]">
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex flex-col items-center shadow-sm">
+                    <p class="text-xs font-bold text-blue-500 mb-1 uppercase tracking-wider">💡 提示 Hint</p>
+                    <div class="relative">
+                        <img id="hint-image" src="" alt="Mouth shape" class="h-24 w-auto object-contain rounded-md" onerror="this.style.display='none'; document.getElementById('hint-fallback').style.display='block';">
+                        <div id="hint-fallback" class="hidden h-24 w-24 flex items-center justify-center bg-gray-200 text-gray-400 text-xs text-center rounded-md p-2">
+                            Image not found
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-6 text-center mt-2 text-gray-400 text-sm" id="timer-bonus">
+                <!-- Bonus text will appear here -->
+            </div>
+        </div>
+
+        <!-- 3. FEEDBACK OVERLAY (Modal) -->
+        <div id="feedback-screen" class="hidden absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white w-full rounded-3xl p-6 shadow-2xl transform scale-100 transition-transform animate-[pop_0.3s_ease-out]">
+                <div class="text-center">
+                    <div class="inline-block p-3 rounded-full bg-green-100 text-green-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h2 class="text-3xl font-bold text-green-600 mb-2">正確！</h2>
+                    <p class="text-gray-500 mb-6" id="feedback-bonus-text">+100 分</p>
+                </div>
+
+                <!-- Comparison Display -->
+                <div class="flex justify-center gap-4 mb-8">
+                    <!-- Left Item (Feedback) -->
+                    <div class="flex-1 bg-gray-50 rounded-xl p-4 flex flex-col items-center border-2" id="fb-left-container">
+                        <div class="text-4xl font-bold text-gray-800 mb-2" id="fb-left-char">字</div>
+                        <div class="text-lg font-mono text-gray-500 bg-gray-200 px-2 rounded" id="fb-left-jyut">jyut</div>
+                    </div>
+                    
+                    <!-- Right Item (Feedback) -->
+                    <div class="flex-1 bg-gray-50 rounded-xl p-4 flex flex-col items-center border-2" id="fb-right-container">
+                        <div class="text-4xl font-bold text-gray-800 mb-2" id="fb-right-char">字</div>
+                        <div class="text-lg font-mono text-gray-500 bg-gray-200 px-2 rounded" id="fb-right-jyut">jyut</div>
+                    </div>
+                </div>
+
+                <button id="feedback-next-btn" onclick="nextRound()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition transform active:scale-95">
+                    繼續 Next
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. GAME OVER SCREEN -->
+        <div id="game-over-screen" class="hidden absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6 text-center animate-[pop_0.3s_ease-out]">
+            <div class="mb-6 text-6xl">🏆</div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">練習完成！</h2>
+            <p class="text-gray-500 mb-8">做得好！繼續努力！</p>
+            
+            <div class="bg-green-50 rounded-2xl p-6 w-full mb-8 border-2 border-green-100">
+                <div class="text-sm text-gray-500 uppercase tracking-wide">最終得分</div>
+                <div class="text-5xl font-bold text-green-600 mt-2" id="final-score">0</div>
+            </div>
+
+            <button onclick="goHome()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition transform active:scale-95 mb-4">
+                返回主頁 Home
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA SETS ---
+        
+        const DATA_PT = [
+            { p: "貼", p_jp: "tip3", t: "鐵", t_jp: "tit3" },
+            { p: "合", p_jp: "hap6", t: "核", t_jp: "hat6" },
+            { p: "十", p_jp: "sap6", t: "實", t_jp: "sat6" },
+            { p: "鴨", p_jp: "aap3", t: "壓", t_jp: "aat3" },
+            { p: "蠟", p_jp: "laap6", t: "辣", t_jp: "laat6" },
+            { p: "攝", p_jp: "sip3", t: "舌", t_jp: "sit6" },
+            { p: "入", p_jp: "jap6", t: "日", t_jp: "jat6" },
+            { p: "拾", p_jp: "sap6", t: "實", t_jp: "sat6" },
+            { p: "濕", p_jp: "sap1", t: "室", t_jp: "sat1" },
+            { p: "執", p_jp: "zap1", t: "質", t_jp: "zat1" },
+            { p: "吸", p_jp: "kap1", t: "咳", t_jp: "kat1" },
+            { p: "泣", p_jp: "jap1", t: "一", t_jp: "jat1" },
+            { p: "摺", p_jp: "zip3", t: "折", t_jp: "zit3" },
+            { p: "葉", p_jp: "jip6", t: "熱", t_jp: "jit6" },
+            { p: "緝", p_jp: "cap1", t: "七", t_jp: "cat1" },
+            { p: "插", p_jp: "caap3", t: "擦", t_jp: "caat3" },
+            { p: "急", p_jp: "gap1", t: "吉", t_jp: "gat1" }
+        ];
+
+        const DATA_PK = [
+            { p: "插", p_jp: "caap3", k: "拆", k_jp: "caak3" },
+            { p: "夾", p_jp: "gaap3", k: "格", k_jp: "gaak3" },
+            { p: "垃", p_jp: "laap6", k: "勒", k_jp: "lak6" },
+            { p: "臘", p_jp: "laap6", k: "肋", k_jp: "lak6" },
+            { p: "閘", p_jp: "zaap6", k: "擇", k_jp: "zaak6" },
+            { p: "襲", p_jp: "zaap6", k: "宅", k_jp: "zaak6" },
+            { p: "雜", p_jp: "zaap6", k: "擇", k_jp: "zaak6" },
+            { p: "襲", p_jp: "zaap6", k: "摘", k_jp: "zaak3" },
+            { p: "習", p_jp: "zaap6", k: "擲", k_jp: "zaak6" },
+            { p: "集", p_jp: "zaap6", k: "宅", k_jp: "zaak6" }
+        ];
+
+        const DATA_MN = [
+            { m: "南", m_jp: "naam4", n: "難", n_jp: "naan4" },
+            { m: "尋", m_jp: "cam4", n: "塵", n_jp: "can4" },
+            { m: "感", m_jp: "gam2", n: "緊", n_jp: "gan2" },
+            { m: "心", m_jp: "sam1", n: "新", n_jp: "san1" },
+            { m: "森", m_jp: "sam1", n: "新", n_jp: "san1" },
+            { m: "浸", m_jp: "zam3", n: "震", n_jp: "zan3" },
+            { m: "藍", m_jp: "laam4", n: "蘭", n_jp: "laan4" },
+            { m: "參", m_jp: "caam1", n: "餐", n_jp: "caan1" },
+            { m: "三", m_jp: "saam1", n: "山", n_jp: "saan1" }
+        ];
+
+        // --- GAME STATE ---
+        let currentMode = '';
+        let currentData = [];
+        let score = 0;
+        let trialsCount = 0;
+        const MAX_TRIALS = 15;
+        let roundStartTime = 0;
+        let currentPair = null;
+        let targetType = ''; // 'p', 't', 'k', 'm', 'n'
+        let hintTimeout; // Timer for the hint
+        
+        // --- AUDIO ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playCorrectSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(500, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        // --- CORE FUNCTIONS ---
+
+        function goHome() {
+            // Hide all game screens
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('feedback-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            
+            // Clear any active timers
+            clearTimeout(hintTimeout);
+
+            // Show Menu
+            document.getElementById('menu-screen').classList.remove('hidden');
+            
+            // Reset Score UI just in case
+            score = 0;
+            document.getElementById('score-display').innerText = `分: 0`;
+        }
+
+        function startGame(mode) {
+            currentMode = mode;
+            score = 0;
+            trialsCount = 0; // Reset trials
+            document.getElementById('score-display').innerText = `分: ${score}`;
+            
+            // Switch screens
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+
+            // Select Data
+            if (mode === 'pt') currentData = [...DATA_PT];
+            else if (mode === 'pk') currentData = [...DATA_PK];
+            else if (mode === 'mn') currentData = [...DATA_MN];
+
+            // Shuffle Data
+            currentData.sort(() => Math.random() - 0.5);
+
+            nextRound();
+        }
+
+        function nextRound() {
+            // Check if game over
+            if (trialsCount >= MAX_TRIALS) {
+                endGame();
+                return;
+            }
+
+            // Hide feedback & Reset Hint
+            document.getElementById('feedback-screen').classList.add('hidden');
+            hideHint();
+            
+            // Increment Trial
+            trialsCount++;
+            updateProgress();
+
+            // Pick a random pair from the set
+            const pairIndex = Math.floor(Math.random() * currentData.length);
+            currentPair = currentData[pairIndex];
+
+            // Determine Target (e.g., asked to find P or T?)
+            const types = currentMode.split(''); // ['p', 't'] or ['p', 'k'] or ['m', 'n']
+            targetType = types[Math.floor(Math.random() * types.length)];
+
+            // Setup UI
+            renderRound();
+            
+            roundStartTime = Date.now();
+            
+            // Start the 10-second hint timer
+            hintTimeout = setTimeout(showHint, 10000);
+        }
+
+        function showHint() {
+            const hintContainer = document.getElementById('hint-container');
+            if (!hintContainer.classList.contains('hidden')) return; // Already showing
+
+            const hintImg = document.getElementById('hint-image');
+            const hintFallback = document.getElementById('hint-fallback');
+            
+            // Reset image state
+            hintImg.style.display = 'block';
+            hintFallback.style.display = 'none';
+            
+            // Set image source based on targetType
+            // Filenames: p_visual.jpg, t_visual.jpg, k_visual.jpg, m_visual.jpg, n_visual.jpg
+            hintImg.src = `${targetType}_visual.jpg`;
+            
+            // Update fallback text just in case
+            hintFallback.innerText = `${targetType}_visual.jpg`;
+
+            hintContainer.classList.remove('hidden');
+        }
+
+        function hideHint() {
+            clearTimeout(hintTimeout);
+            document.getElementById('hint-container').classList.add('hidden');
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progress-bar');
+            const counterText = document.getElementById('trial-counter');
+            
+            const percent = (trialsCount / MAX_TRIALS) * 100;
+            progressBar.style.width = `${percent}%`;
+            counterText.innerText = `${trialsCount} / ${MAX_TRIALS}`;
+        }
+
+        function endGame() {
+            document.getElementById('feedback-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+        }
+
+        function getLabel(type) {
+            switch(type) {
+                case 'p': return { text: '「鴨」尾音 /-p/', color: 'text-blue-600' };
+                case 't': return { text: '「八」尾音 /-t/', color: 'text-blue-600' };
+                case 'k': return { text: '「宅」尾音 /-k/', color: 'text-orange-600' };
+                case 'm': return { text: '「南」尾音 /-m/', color: 'text-purple-600' };
+                case 'n': return { text: '「難」尾音 /-n/', color: 'text-purple-600' };
+                default: return { text: '', color: '' };
+            }
+        }
+
+        function renderRound() {
+            const labelData = getLabel(targetType);
+            
+            // Set Instruction
+            const instructionEl = document.getElementById('instruction-text');
+            instructionEl.innerHTML = `請選擇含有<br><span class="${labelData.color} text-2xl">${labelData.text}</span> 的字詞`;
+
+            // Randomize position (Left vs Right)
+            const isLeftTarget = Math.random() > 0.5;
+
+            const leftBtn = document.getElementById('card-left');
+            const rightBtn = document.getElementById('card-right');
+
+            // Reset styles
+            leftBtn.classList.remove('shake');
+            rightBtn.classList.remove('shake');
+
+            // Set Content
+            if (isLeftTarget) {
+                // Left is correct answer
+                leftBtn.innerText = currentPair[targetType];
+                rightBtn.innerText = currentPair[getOppositeType()];
+                leftBtn.dataset.type = targetType;
+                rightBtn.dataset.type = getOppositeType();
+            } else {
+                // Right is correct answer
+                leftBtn.innerText = currentPair[getOppositeType()];
+                rightBtn.innerText = currentPair[targetType];
+                leftBtn.dataset.type = getOppositeType();
+                rightBtn.dataset.type = targetType;
+            }
+        }
+
+        function getOppositeType() {
+            const types = currentMode.split('');
+            return types[0] === targetType ? types[1] : types[0];
+        }
+
+        function handleCardClick(side) {
+            const btn = document.getElementById(`card-${side}`);
+            const selectedType = btn.dataset.type;
+
+            if (selectedType === targetType) {
+                // CORRECT
+                playCorrectSound();
+                clearTimeout(hintTimeout); // Stop hint timer
+                
+                // Calculate Score (Base 100 + Speed Bonus)
+                const timeTaken = (Date.now() - roundStartTime) / 1000;
+                let bonus = 0;
+                if (timeTaken < 1.5) bonus = 50;
+                else if (timeTaken < 3) bonus = 20;
+                
+                const roundScore = 100 + bonus;
+                score += roundScore;
+                
+                // Update Score UI
+                document.getElementById('score-display').innerText = `分: ${score}`;
+                document.getElementById('feedback-bonus-text').innerText = timeTaken < 1.5 ? "速度極快！ +150 分" : "+100 分";
+
+                showFeedback(roundScore);
+            } else {
+                // WRONG
+                btn.classList.add('shake');
+                showHint(); // Show visual hint immediately on wrong answer
+                
+                // Remove shake class after animation so it can be triggered again
+                setTimeout(() => {
+                    btn.classList.remove('shake');
+                }, 400);
+            }
+        }
+
+        function showFeedback(points) {
+            const modal = document.getElementById('feedback-screen');
+            modal.classList.remove('hidden');
+            
+            // Update Button Text if it's the last round
+            const nextBtn = document.getElementById('feedback-next-btn');
+            if (trialsCount >= MAX_TRIALS) {
+                nextBtn.innerText = "完成 Finish";
+            } else {
+                nextBtn.innerText = "繼續 Next";
+            }
+
+            // Configure Feedback Cards
+            const leftContainer = document.getElementById('fb-left-container');
+            const rightContainer = document.getElementById('fb-right-container');
+            
+            const targetCode = targetType;
+            const otherCode = getOppositeType();
+            
+            document.getElementById('fb-left-char').innerText = currentPair[targetCode];
+            document.getElementById('fb-left-jyut').innerText = currentPair[targetCode + "_jp"];
+            
+            document.getElementById('fb-right-char').innerText = currentPair[otherCode];
+            document.getElementById('fb-right-jyut').innerText = currentPair[otherCode + "_jp"];
+
+            // Styling highlight
+            leftContainer.className = "flex-1 bg-green-50 border-4 border-green-400 rounded-xl p-4 flex flex-col items-center shadow-lg transform scale-105";
+            rightContainer.className = "flex-1 bg-gray-50 border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center opacity-70";
+        }
+
+    </script>
+</body>
+</html>
