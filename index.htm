@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>粵語韻尾大挑戰</title>
+    <title>粵語尾音挑戰</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
@@ -66,7 +66,7 @@
             <button onclick="goHome()" class="flex items-center text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-lg transition text-sm font-bold">
                 <span class="mr-1">🏠</span> 主頁
             </button>
-            <div class="font-bold text-xl absolute left-1/2 transform -translate-x-1/2">韻尾大挑戰</div>
+            <div class="font-bold text-xl absolute left-1/2 transform -translate-x-1/2">尾音挑戰</div>
             <div class="bg-green-700 px-4 py-1 rounded-full font-mono text-lg" id="score-display">分: 0</div>
         </div>
 
@@ -76,17 +76,17 @@
             
             <button onclick="startGame('pt')" class="w-full bg-blue-100 hover:bg-blue-200 border-2 border-blue-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md">
                 <div class="text-2xl font-bold text-blue-800 text-center">/-p/ vs /-t/</div>
-                <div class="text-center text-blue-600 text-sm mt-1">鴨尾 vs 八尾</div>
+                <div class="text-center text-blue-600 text-sm mt-1">鴨 vs 八</div>
             </button>
 
             <button onclick="startGame('pk')" class="w-full bg-orange-100 hover:bg-orange-200 border-2 border-orange-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md">
                 <div class="text-2xl font-bold text-orange-800 text-center">/-p/ vs /-k/</div>
-                <div class="text-center text-orange-600 text-sm mt-1">鴨尾 vs 宅尾</div>
+                <div class="text-center text-orange-600 text-sm mt-1">鴨 vs 宅</div>
             </button>
 
             <button onclick="startGame('mn')" class="w-full bg-purple-100 hover:bg-purple-200 border-2 border-purple-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md">
                 <div class="text-2xl font-bold text-purple-800 text-center">/-m/ vs /-n/</div>
-                <div class="text-center text-purple-600 text-sm mt-1">南尾 vs 難尾</div>
+                <div class="text-center text-purple-600 text-sm mt-1">南 vs 難</div>
             </button>
         </div>
 
@@ -103,7 +103,7 @@
 
             <!-- Instruction -->
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r shadow-sm">
-                <p class="text-gray-500 text-sm font-bold uppercase tracking-wide mb-1">任務指令</p>
+                <p class="text-gray-500 text-sm font-bold uppercase tracking-wide mb-1">任務</p>
                 <p class="text-xl font-bold text-gray-800 leading-relaxed" id="instruction-text">
                     請選擇含有...
                 </p>
@@ -181,35 +181,34 @@
         
         const DATA_PT = [
             { p: "貼", p_jp: "tip3", t: "鐵", t_jp: "tit3" },
-            { p: "合", p_jp: "hap6", t: "核", t_jp: "hat6" },
-            { p: "十", p_jp: "sap6", t: "實", t_jp: "sat6" },
-            { p: "鴨", p_jp: "aap3", t: "壓", t_jp: "aat3" },
-            { p: "蠟", p_jp: "laap6", t: "辣", t_jp: "laat6" },
-            { p: "攝", p_jp: "sip3", t: "舌", t_jp: "sit6" },
-            { p: "入", p_jp: "jap6", t: "日", t_jp: "jat6" },
-            { p: "拾", p_jp: "sap6", t: "實", t_jp: "sat6" },
-            { p: "濕", p_jp: "sap1", t: "室", t_jp: "sat1" },
-            { p: "執", p_jp: "zap1", t: "質", t_jp: "zat1" },
-            { p: "吸", p_jp: "kap1", t: "咳", t_jp: "kat1" },
-            { p: "泣", p_jp: "jap1", t: "一", t_jp: "jat1" },
-            { p: "摺", p_jp: "zip3", t: "折", t_jp: "zit3" },
-            { p: "葉", p_jp: "jip6", t: "熱", t_jp: "jit6" },
-            { p: "緝", p_jp: "cap1", t: "七", t_jp: "cat1" },
-            { p: "插", p_jp: "caap3", t: "擦", t_jp: "caat3" },
-            { p: "急", p_jp: "gap1", t: "吉", t_jp: "gat1" }
+            { p: "合", p_jp: "hap9", t: "核", t_jp: "hat9" },
+            { p: "十", p_jp: "sap9", t: "實", t_jp: "sat9" },
+            { p: "鴨", p_jp: "aap8", t: "壓", t_jp: "aat8" },
+            { p: "蠟", p_jp: "laap9", t: "辣", t_jp: "laat9" },
+            { p: "入", p_jp: "jap9", t: "日", t_jp: "jat9" },
+            { p: "拾", p_jp: "sap9", t: "實", t_jp: "sat9" },
+            { p: "濕", p_jp: "sap7", t: "室", t_jp: "sat7" },
+            { p: "執", p_jp: "zap7", t: "質", t_jp: "zat7" },
+            { p: "吸", p_jp: "kap7", t: "咳", t_jp: "kat7" },
+            { p: "泣", p_jp: "jap7", t: "一", t_jp: "jat7" },
+            { p: "摺", p_jp: "zip8", t: "折", t_jp: "zit8" },
+            { p: "葉", p_jp: "jip9", t: "熱", t_jp: "jit9" },
+            { p: "緝", p_jp: "cap7", t: "七", t_jp: "cat7" },
+            { p: "插", p_jp: "caap8", t: "擦", t_jp: "caat8" },
+            { p: "急", p_jp: "gap7", t: "吉", t_jp: "gat7" }
         ];
 
         const DATA_PK = [
-            { p: "插", p_jp: "caap3", k: "拆", k_jp: "caak3" },
-            { p: "夾", p_jp: "gaap3", k: "格", k_jp: "gaak3" },
-            { p: "垃", p_jp: "laap6", k: "勒", k_jp: "lak6" },
-            { p: "臘", p_jp: "laap6", k: "肋", k_jp: "lak6" },
-            { p: "閘", p_jp: "zaap6", k: "擇", k_jp: "zaak6" },
-            { p: "襲", p_jp: "zaap6", k: "宅", k_jp: "zaak6" },
-            { p: "雜", p_jp: "zaap6", k: "擇", k_jp: "zaak6" },
+            { p: "插", p_jp: "caap8", k: "拆", k_jp: "caak8" },
+            { p: "夾", p_jp: "gaap8", k: "格", k_jp: "gaak8" },
+            { p: "垃", p_jp: "laap6", k: "勒", k_jp: "laak6" },
+            { p: "立", p_jp: "lap6", k: "肋", k_jp: "lak6" },
+            { p: "閘", p_jp: "zaap9", k: "擇", k_jp: "zaak9" },
+            { p: "襲", p_jp: "zaap9", k: "宅", k_jp: "zaak9" },
+            { p: "雜", p_jp: "zaap9", k: "擇", k_jp: "zaak9" },
             { p: "襲", p_jp: "zaap6", k: "摘", k_jp: "zaak3" },
-            { p: "習", p_jp: "zaap6", k: "擲", k_jp: "zaak6" },
-            { p: "集", p_jp: "zaap6", k: "宅", k_jp: "zaak6" }
+            { p: "習", p_jp: "zaap9", k: "擲", k_jp: "zaak9" },
+            { p: "集", p_jp: "zaap9", k: "宅", k_jp: "zaak9" }
         ];
 
         const DATA_MN = [
