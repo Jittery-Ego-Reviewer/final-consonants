@@ -74,19 +74,40 @@
         <div id="menu-screen" class="flex-1 flex flex-col items-center justify-center p-6 space-y-6">
             <h1 class="text-2xl font-bold text-gray-800 text-center mb-4">請選擇練習模式</h1>
             
-            <button onclick="startGame('pt')" class="w-full bg-blue-100 hover:bg-blue-200 border-2 border-blue-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md">
-                <div class="text-2xl font-bold text-blue-800 text-center">/-p/ vs /-t/</div>
-                <div class="text-center text-blue-600 text-sm mt-1">鴨 vs 八</div>
+            <button onclick="startGame('pt')" class="w-full bg-blue-100 hover:bg-blue-200 border-2 border-blue-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md relative overflow-hidden group">
+                <div class="relative z-10">
+                    <div class="text-2xl font-bold text-blue-800 text-center">/-p/ vs /-t/</div>
+                    <div class="text-center text-blue-600 text-sm mt-1 mb-2">鴨 vs 八</div>
+                    <div class="flex justify-center">
+                        <span class="text-xs font-bold text-blue-500 bg-white/60 px-2 py-1 rounded-full">
+                            👑 最高分: <span id="hs-pt">0</span>
+                        </span>
+                    </div>
+                </div>
             </button>
 
-            <button onclick="startGame('pk')" class="w-full bg-orange-100 hover:bg-orange-200 border-2 border-orange-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md">
-                <div class="text-2xl font-bold text-orange-800 text-center">/-p/ vs /-k/</div>
-                <div class="text-center text-orange-600 text-sm mt-1">鴨 vs 宅</div>
+            <button onclick="startGame('pk')" class="w-full bg-orange-100 hover:bg-orange-200 border-2 border-orange-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md relative overflow-hidden group">
+                <div class="relative z-10">
+                    <div class="text-2xl font-bold text-orange-800 text-center">/-p/ vs /-k/</div>
+                    <div class="text-center text-orange-600 text-sm mt-1 mb-2">鴨 vs 宅</div>
+                    <div class="flex justify-center">
+                        <span class="text-xs font-bold text-orange-500 bg-white/60 px-2 py-1 rounded-full">
+                            👑 最高分: <span id="hs-pk">0</span>
+                        </span>
+                    </div>
+                </div>
             </button>
 
-            <button onclick="startGame('mn')" class="w-full bg-purple-100 hover:bg-purple-200 border-2 border-purple-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md">
-                <div class="text-2xl font-bold text-purple-800 text-center">/-m/ vs /-n/</div>
-                <div class="text-center text-purple-600 text-sm mt-1">南 vs 難</div>
+            <button onclick="startGame('mn')" class="w-full bg-purple-100 hover:bg-purple-200 border-2 border-purple-400 p-6 rounded-2xl text-left transition transform hover:-translate-y-1 shadow-md relative overflow-hidden group">
+                <div class="relative z-10">
+                    <div class="text-2xl font-bold text-purple-800 text-center">/-m/ vs /-n/</div>
+                    <div class="text-center text-purple-600 text-sm mt-1 mb-2">南 vs 難</div>
+                    <div class="flex justify-center">
+                        <span class="text-xs font-bold text-purple-500 bg-white/60 px-2 py-1 rounded-full">
+                            👑 最高分: <span id="hs-mn">0</span>
+                        </span>
+                    </div>
+                </div>
             </button>
         </div>
 
@@ -167,6 +188,7 @@
             <div class="bg-green-50 rounded-2xl p-6 w-full mb-8 border-2 border-green-100">
                 <div class="text-sm text-gray-500 uppercase tracking-wide">最終得分</div>
                 <div class="text-5xl font-bold text-green-600 mt-2" id="final-score">0</div>
+                <div class="mt-2 text-sm text-green-500 font-bold hidden" id="new-record-badge">✨ 新紀錄！ New Record!</div>
             </div>
 
             <button onclick="goHome()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition transform active:scale-95 mb-4">
@@ -256,7 +278,32 @@
             oscillator.stop(audioCtx.currentTime + 0.5);
         }
 
+        // --- HIGHSCORE FUNCTIONS ---
+        function getHighScore(mode) {
+            return localStorage.getItem('cantonese_score_' + mode) || 0;
+        }
+
+        function setHighScore(mode, newScore) {
+            const current = parseInt(getHighScore(mode));
+            if (newScore > current) {
+                localStorage.setItem('cantonese_score_' + mode, newScore);
+                return true;
+            }
+            return false;
+        }
+
+        function updateMenuHighScores() {
+            document.getElementById('hs-pt').innerText = getHighScore('pt');
+            document.getElementById('hs-pk').innerText = getHighScore('pk');
+            document.getElementById('hs-mn').innerText = getHighScore('mn');
+        }
+
         // --- CORE FUNCTIONS ---
+        
+        // Init logic
+        window.onload = function() {
+            updateMenuHighScores();
+        };
 
         function goHome() {
             // Hide all game screens
@@ -267,6 +314,9 @@
             // Show Menu
             document.getElementById('menu-screen').classList.remove('hidden');
             
+            // Update scores incase they changed
+            updateMenuHighScores();
+
             // Reset Score UI just in case
             score = 0;
             document.getElementById('score-display').innerText = `分: 0`;
@@ -282,6 +332,7 @@
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('new-record-badge').classList.add('hidden');
 
             // Select Data
             if (mode === 'pt') currentData = [...DATA_PT];
@@ -335,7 +386,14 @@
             document.getElementById('feedback-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('game-over-screen').classList.remove('hidden');
+            
             document.getElementById('final-score').innerText = score;
+
+            // Check High Score
+            const isNewRecord = setHighScore(currentMode, score);
+            if (isNewRecord) {
+                document.getElementById('new-record-badge').classList.remove('hidden');
+            }
         }
 
         function getLabel(type) {
